@@ -1,28 +1,77 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <HeaderComponent
+      v-if="questions.length"
+      :totalQuestion="questions.length"
+      :currentQuestion="index+1"
+      :noOfCorrectAnswer="noOfCorrectAnswer"
+    />
+    <b-container>
+      <QuestionBoxComponent 
+      v-if="questions.length" 
+      :currentQuestion="questions[index]" 
+      :totalQuestion="questions.length"
+      :index="index+1"
+      :next="next"
+      :startNewQuiz="startNewQuiz"
+      :increaseCorrectAnswer="increaseCorrectAnswer" />
+      
+    </b-container>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import HeaderComponent from './components/HeaderComponent.vue'
+import QuestionBoxComponent from './components/QuestionBoxComponent'
+
 
 export default {
   name: 'app',
   components: {
-    HelloWorld
+    HeaderComponent,
+    QuestionBoxComponent,
+    
+  },
+  data () {
+    return {
+      questions : [],
+      index: 0,
+      noOfCorrectAnswer : 0,
+      loading : true
+    }
+  },
+  mounted: function() {
+    this.setInitialData()
+  },
+  methods : {
+    next () {
+      this.index++;
+    },
+    increaseCorrectAnswer() {
+      this.noOfCorrectAnswer++;
+    }, 
+    startNewQuiz() {
+      this.setInitialData();
+    },
+    setInitialData() {
+
+      
+      fetch('https://opentdb.com/api.php?amount=10&difficulty=medium&type=multiple')
+      .then((response) => {
+        return response.json();
+      })
+      .then((jsonData) => {
+        this.questions = jsonData.results
+        
+        // Initial Values
+        this.index = 0;
+        this.noOfCorrectAnswer = 0;
+      });
+    }
   }
+  
 }
+
 </script>
 
-<style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
+
